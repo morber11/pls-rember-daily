@@ -1,6 +1,6 @@
 //go:build windows
 
-package startup
+package windows
 
 import (
 	"fmt"

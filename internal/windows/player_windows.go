@@ -1,6 +1,6 @@
 //go:build windows
 
-package player
+package windows
 
 /*
 #cgo windows CXXFLAGS: -std=c++17
@@ -36,7 +36,7 @@ func Play(video assets.Video, onStarted func() error) error {
 	defer closeServer()
 
 	if err := onStarted(); err != nil {
-		return fmt.Errorf("mark reminder as shown: %w", err)
+		return err
 	}
 
 	wideVideoURL, err := syscall.UTF16PtrFromString(videoURL)
@@ -57,8 +57,6 @@ func Play(video assets.Video, onStarted func() error) error {
 	return nil
 }
 
-// set up a temp HTTP server to serve the video
-// might be overkill but it's straightforward with how MF API works
 func serveVideo(video assets.Video) (string, func(), error) {
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
