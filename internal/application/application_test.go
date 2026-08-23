@@ -199,15 +199,23 @@ func TestRunSuccessfulFlow(t *testing.T) {
 	if err := runner.Run(); err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if len(fakes.clock.sleepDurations) != 1 || fakes.clock.sleepDurations[0] != startupDelay {
+
+	if startupDelay == 0 {
+		if len(fakes.clock.sleepDurations) != 0 {
+			t.Fatalf("sleep durations = %v, want none", fakes.clock.sleepDurations)
+		}
+	} else if len(fakes.clock.sleepDurations) != 1 || fakes.clock.sleepDurations[0] != startupDelay {
 		t.Fatalf("sleep durations = %v, want [%v]", fakes.clock.sleepDurations, startupDelay)
 	}
+
 	if !fakes.schedule.selected || fakes.platform.played.Name != testVideo.Name {
 		t.Fatalf("played video = %q, want %q", fakes.platform.played.Name, testVideo.Name)
 	}
+
 	if got := *fakes.platform.markDisplayOrder; len(got) != 2 || got[0] != "mark" || got[1] != "display" {
 		t.Fatalf("mark/display order = %v, want [mark display]", got)
 	}
+
 	if !fakes.platform.released {
 		t.Fatal("Run() did not release the acquired instance")
 	}

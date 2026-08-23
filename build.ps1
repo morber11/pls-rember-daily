@@ -1,5 +1,6 @@
 param(
-    [switch]$AllowMultipleRuns
+    [switch]$AllowMultipleRuns,
+    [switch]$SkipStartupDelay
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,7 +21,8 @@ if (-not (Test-Path -LiteralPath $iconPath -PathType Leaf)) {
 $rsrc = Get-Command rsrc -ErrorAction SilentlyContinue
 if ($null -ne $rsrc) {
     & $rsrc.Source -ico $iconPath -o $resourcePath
-} else {
+}
+else {
     go run github.com/akavel/rsrc@v0.10.2 -ico $iconPath -o $resourcePath
 }
 if ($LASTEXITCODE -ne 0) {
@@ -41,6 +43,11 @@ $buildTags = @()
 if ($AllowMultipleRuns) {
     $buildTags += "allowmultipleruns"
     Write-Host "building with AllowMultipleRuns" -ForegroundColor Yellow
+}
+
+if ($SkipStartupDelay) {
+    $buildTags += "skipstartupdelay"
+    Write-Host "building with SkipStartupDelay" -ForegroundColor Yellow
 }
 
 $buildArguments = @("-ldflags=-H windowsgui", "-o", $outputPath)

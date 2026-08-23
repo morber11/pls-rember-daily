@@ -7,8 +7,6 @@ import (
 	"plsremberdaily/assets"
 )
 
-const startupDelay = 5 * time.Second
-
 type Platform interface {
 	Acquire() (release func(), acquired bool, err error)
 	RegisterStartup() error
@@ -82,7 +80,7 @@ func (runner Runner) Run() error {
 		}
 	}
 
-	runner.clock.Sleep(startupDelay)
+	waitForStartup(runner.clock)
 
 	video := runner.schedule.Video(runner.clock.Now())
 	return runner.platform.Play(video, func() error {
