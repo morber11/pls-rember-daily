@@ -23,11 +23,7 @@ import (
 	"plsremberdaily/assets"
 )
 
-const (
-	windowWidth  = 480
-	windowHeight = 270
-	videoPath    = "/video"
-)
+const videoPath = "/video"
 
 func Play(video assets.Video, onStarted func() error) error {
 	if result := C.wait_for_user_desktop(); result < 0 {
@@ -49,11 +45,7 @@ func Play(video assets.Video, onStarted func() error) error {
 		return fmt.Errorf("encode video URL: %w", err)
 	}
 
-	result := C.play_video(
-		(*C.wchar_t)(unsafe.Pointer(wideVideoURL)),
-		C.int(windowWidth),
-		C.int(windowHeight),
-	)
+	result := C.play_video((*C.wchar_t)(unsafe.Pointer(wideVideoURL)))
 
 	if result < 0 {
 		return fmt.Errorf("play video: HRESULT 0x%08X", uint32(result))

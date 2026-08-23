@@ -8,7 +8,7 @@ extern "C"
 {
 #endif
 
-    long play_video(const wchar_t *video_url, int width, int height);
+    long play_video(const wchar_t *video_url);
 
 #ifdef __cplusplus
 }

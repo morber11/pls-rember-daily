@@ -21,11 +21,47 @@ namespace
     constexpr UINT playback_error_message = WM_APP + 3;   // playback error
 
     constexpr int icon_resource_id = 1;
+    constexpr int minimum_player_width = 480;
+    constexpr int minimum_player_height = 270;
+    constexpr int display_size_divisor = 4;
+
+    struct player_size
+    {
+        int width;
+        int height;
+    };
 
     struct window_state
     {
         HRESULT result = S_OK;
     };
+
+    player_size calculate_player_size(int display_width, int display_height)
+    {
+        player_size size{
+            display_width / display_size_divisor,
+            display_height / display_size_divisor};
+
+        if (size.width < minimum_player_width ||
+            size.height < minimum_player_height)
+        {
+            return {minimum_player_width, minimum_player_height};
+        }
+
+        if (size.width * minimum_player_height >
+            size.height * minimum_player_width)
+        {
+            size.width = size.height * minimum_player_width /
+                         minimum_player_height;
+        }
+        else
+        {
+            size.height = size.width * minimum_player_height /
+                          minimum_player_width;
+        }
+
+        return size;
+    }
 
     class player_callback final : public IMFMediaEngineNotify
     {
@@ -182,8 +218,8 @@ namespace
         return HRESULT_FROM_WIN32(GetLastError());
     }
 
-    HRESULT create_player_window(HINSTANCE instance, int width, int height,
-                                 window_state *state, HWND *window)
+    HRESULT create_player_window(HINSTANCE instance, window_state *state,
+                                 HWND *window)
     {
         RECT work_area{};
         if (!SystemParametersInfoW(SPI_GETWORKAREA, 0, &work_area, 0))
@@ -191,8 +227,12 @@ namespace
             return HRESULT_FROM_WIN32(GetLastError());
         }
 
-        const int x = work_area.right - width;
-        const int y = work_area.bottom - height;
+        const player_size size = calculate_player_size(
+            GetSystemMetrics(SM_CXSCREEN),
+            GetSystemMetrics(SM_CYSCREEN));
+
+        const int x = work_area.right - size.width;
+        const int y = work_area.bottom - size.height;
 
         *window = CreateWindowExW(
             WS_EX_APPWINDOW | WS_EX_TOPMOST,
@@ -201,8 +241,8 @@ namespace
             WS_POPUP,
             x,
             y,
-            width,
-            height,
+            size.width,
+            size.height,
             nullptr,
             nullptr,
             instance,
@@ -218,7 +258,7 @@ namespace
 
 } // namespace
 
-extern "C" long play_video(const wchar_t *video_url, int width, int height)
+extern "C" long play_video(const wchar_t *video_url)
 {
     HRESULT result = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
     const bool should_uninitialize_com = SUCCEEDED(result);
@@ -245,7 +285,7 @@ extern "C" long play_video(const wchar_t *video_url, int width, int height)
     HWND window = nullptr;
     if (SUCCEEDED(result))
     {
-        result = create_player_window(instance, width, height, &state, &window);
+        result = create_player_window(instance, &state, &window);
     }
 
     auto *callback =
