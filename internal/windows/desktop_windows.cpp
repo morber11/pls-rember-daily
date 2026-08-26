@@ -11,29 +11,19 @@ extern "C" long wait_for_user_desktop(void)
 {
     while (true)
     {
-        HDESK desktop = GetThreadDesktop(GetCurrentThreadId());
+        HDESK desktop = OpenInputDesktop(0, FALSE, DESKTOP_READOBJECTS);
 
-        if (desktop == nullptr)
+        if (desktop != nullptr)
         {
-            return HRESULT_FROM_WIN32(GetLastError());
-        }
-
-        BOOL user_desktop_is_active = FALSE;
-        DWORD required_bytes = 0;
-
-        if (!GetUserObjectInformationW(
-                desktop,
-                UOI_IO,
-                &user_desktop_is_active,
-                sizeof(user_desktop_is_active),
-                &required_bytes))
-        {
-            return HRESULT_FROM_WIN32(GetLastError());
-        }
-
-        if (user_desktop_is_active)
-        {
+            CloseDesktop(desktop);
             return S_OK;
+        }
+
+        const DWORD error = GetLastError();
+
+        if (error != ERROR_ACCESS_DENIED)
+        {
+            return HRESULT_FROM_WIN32(error);
         }
 
         Sleep(500);

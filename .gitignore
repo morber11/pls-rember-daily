@@ -7,7 +7,7 @@
 *.dll
 *.so
 *.dylib
-cmd/pls-rember-daily/rsrc.syso
+cmd/pls-rember-daily/rsrc*.syso
 
 # Test binary, built with `go test -c`
 *.test

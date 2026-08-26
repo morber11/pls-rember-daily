@@ -10,6 +10,7 @@ $outputDirectory = Join-Path $projectRoot "dist"
 $outputPath = Join-Path $outputDirectory "PlsRemberDaily.exe"
 $iconPath = Join-Path $projectRoot "assets\images\plsrember.ico"
 $resourcePath = Join-Path $projectRoot "cmd\pls-rember-daily\rsrc.syso"
+$resourceDirectory = Split-Path -Parent $resourcePath
 
 Set-Location $projectRoot
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
@@ -17,6 +18,9 @@ New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 if (-not (Test-Path -LiteralPath $iconPath -PathType Leaf)) {
     throw "Icon file not found: $iconPath"
 }
+
+Get-ChildItem -LiteralPath $resourceDirectory -Filter "rsrc*.syso" |
+    Remove-Item -Force
 
 $rsrc = Get-Command rsrc -ErrorAction SilentlyContinue
 if ($null -ne $rsrc) {
