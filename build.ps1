@@ -9,7 +9,7 @@ $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $outputDirectory = Join-Path $projectRoot "dist"
 $outputPath = Join-Path $outputDirectory "PlsRemberDaily.exe"
 $iconPath = Join-Path $projectRoot "assets\images\plsrember.ico"
-$resourcePath = Join-Path $projectRoot "cmd\pls-rember-daily\rsrc.syso"
+$resourcePath = Join-Path $projectRoot "cmd\pls-rember-daily\rsrc_windows_amd64.syso"
 $resourceDirectory = Split-Path -Parent $resourcePath
 
 Set-Location $projectRoot
