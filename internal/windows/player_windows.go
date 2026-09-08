@@ -5,7 +5,6 @@ package windows
 /*
 #cgo windows CXXFLAGS: -std=c++17
 #cgo windows LDFLAGS: -lmfplat -lmfuuid -lole32 -loleaut32 -luuid -luser32 -lgdi32
-#include "desktop_windows.h"
 #include "player_windows.h"
 */
 import "C"
@@ -26,10 +25,6 @@ import (
 const videoPath = "/video"
 
 func Play(video assets.Video, onStarted func() error) error {
-	if result := C.wait_for_user_desktop(); result < 0 {
-		return fmt.Errorf("wait for Windows user desktop: HRESULT 0x%08X", uint32(result))
-	}
-
 	videoURL, closeServer, err := serveVideo(video)
 	if err != nil {
 		return err

@@ -17,6 +17,11 @@ func TestVideo(t *testing.T) {
 			wantName: "sember.mp4",
 		},
 		{
+			name:     "September 9",
+			now:      time.Date(2026, time.September, 9, 9, 30, 0, 0, time.Local),
+			wantName: "cirno-whatsapp 2.mp4",
+		},
+		{
 			name:     "Friday the thirteenth",
 			now:      time.Date(2026, time.February, 13, 9, 30, 0, 0, time.Local),
 			wantName: "evil.webm",
