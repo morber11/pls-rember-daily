@@ -22,6 +22,10 @@ var scheduledVideos = []scheduledVideo{
 }
 
 func Video(now time.Time) assets.Video {
+	if now.Month() == time.September && now.Day() == 9 {
+		return assets.CirnoDayVideo()
+	}
+
 	for _, scheduled := range scheduledVideos {
 		if now.Day() == scheduled.day &&
 			(scheduled.month == 0 || now.Month() == scheduled.month) &&
