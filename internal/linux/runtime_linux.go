@@ -3,7 +3,7 @@
 package linux
 
 /*
-#cgo pkg-config: gtk4 gtk4-x11
+#cgo pkg-config: gtk4
 #include <stdlib.h>
 #include "gtk_linux.h"
 */

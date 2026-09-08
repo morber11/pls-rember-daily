@@ -36,8 +36,8 @@ if ! command -v pkg-config >/dev/null 2>&1; then
     exit 1
 fi
 
-if ! pkg-config --atleast-version=4.8 gtk4 gtk4-x11; then
-    echo "GTK 4.8 or newer X11 development files were not found" >&2
+if ! pkg-config --atleast-version=4.8 gtk4; then
+    echo "GTK 4.8 or newer development files were not found" >&2
     exit 1
 fi
 

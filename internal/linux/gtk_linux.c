@@ -3,7 +3,9 @@
 #include "gtk_linux.h"
 
 #include <gtk/gtk.h>
+#ifdef GDK_WINDOWING_X11
 #include <gdk/x11/gdkx.h>
+#endif
 
 #if !GTK_CHECK_VERSION(4, 8, 0)
 #error "Pls Rember Daily requires GTK 4.8 or newer"
@@ -56,6 +58,7 @@ static player_size calculate_player_size(int display_width, int display_height)
     return size;
 }
 
+#ifdef GDK_WINDOWING_X11
 static void prepare_x11_player_window(GtkWidget *widget, gpointer user_data)
 {
     (void)user_data;
@@ -101,16 +104,19 @@ static void prepare_x11_player_window(GtkWidget *widget, gpointer user_data)
     XRaiseWindow(xdisplay, xwindow);
     XFlush(xdisplay);
 }
+#endif
 
 static void size_player_window(GtkWidget *widget, gpointer user_data)
 {
     (void)user_data;
 
     GdkDisplay *display = gtk_widget_get_display(widget);
+#ifdef GDK_WINDOWING_X11
     if (GDK_IS_X11_DISPLAY(display))
     {
         return;
     }
+#endif
 
     GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
     GdkMonitor *monitor = gdk_display_get_monitor_at_surface(display, surface);
@@ -202,8 +208,10 @@ static void activate_player(GtkApplication *application, gpointer user_data)
     gtk_window_set_resizable(state->window, FALSE);
     gtk_window_set_child(state->window, picture);
 
+#ifdef GDK_WINDOWING_X11
     g_signal_connect(state->window, "realize",
                      G_CALLBACK(prepare_x11_player_window), NULL);
+#endif
     g_signal_connect(state->window, "map",
                      G_CALLBACK(size_player_window), NULL);
     g_signal_connect(state->window, "destroy",
