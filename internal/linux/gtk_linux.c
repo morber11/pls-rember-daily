@@ -1,25 +1,13 @@
 //go:build linux
 
 #include "gtk_linux.h"
+#include "window_presenter_linux.h"
 
 #include <gtk/gtk.h>
-#ifdef GDK_WINDOWING_X11
-#include <gdk/x11/gdkx.h>
-#endif
 
 #if !GTK_CHECK_VERSION(4, 8, 0)
 #error "Pls Rember Daily requires GTK 4.8 or newer"
 #endif
-
-static const int minimum_player_width = 480;
-static const int minimum_player_height = 270;
-static const int display_size_divisor = 4;
-
-typedef struct
-{
-    int width;
-    int height;
-} player_size;
 
 typedef struct
 {
@@ -29,110 +17,6 @@ typedef struct
     GtkWindow *window;
     char *error_message;
 } playback_state;
-
-static player_size calculate_player_size(int display_width, int display_height)
-{
-    player_size size = {
-        .width = display_width / display_size_divisor,
-        .height = display_height / display_size_divisor,
-    };
-
-    if (size.width < minimum_player_width ||
-        size.height < minimum_player_height)
-    {
-        return (player_size){minimum_player_width, minimum_player_height};
-    }
-
-    if (size.width * minimum_player_height >
-        size.height * minimum_player_width)
-    {
-        size.width = size.height * minimum_player_width /
-                     minimum_player_height;
-    }
-    else
-    {
-        size.height = size.width * minimum_player_height /
-                      minimum_player_width;
-    }
-
-    return size;
-}
-
-#ifdef GDK_WINDOWING_X11
-static void prepare_x11_player_window(GtkWidget *widget, gpointer user_data)
-{
-    (void)user_data;
-
-    GdkDisplay *display = gtk_widget_get_display(widget);
-    if (!GDK_IS_X11_DISPLAY(display))
-    {
-        return;
-    }
-
-    GdkMonitor *monitor = gdk_x11_display_get_primary_monitor(display);
-    if (monitor == NULL)
-    {
-        return;
-    }
-
-    GdkRectangle geometry;
-    gdk_monitor_get_geometry(monitor, &geometry);
-
-    const player_size size = calculate_player_size(
-        geometry.width, geometry.height);
-    gtk_window_set_default_size(GTK_WINDOW(widget), size.width, size.height);
-
-    GdkRectangle workarea;
-    gdk_x11_monitor_get_workarea(monitor, &workarea);
-
-    GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
-
-    const int scale = gdk_surface_get_scale_factor(surface);
-    const int x = (workarea.x + workarea.width - size.width) * scale;
-    const int y = (workarea.y + workarea.height - size.height) * scale;
-
-    Display *xdisplay = gdk_x11_display_get_xdisplay(display);
-    Window xwindow = gdk_x11_surface_get_xid(surface);
-
-    XSetWindowAttributes attributes = {
-        .override_redirect = True,
-    };
-
-    XChangeWindowAttributes(xdisplay, xwindow, CWOverrideRedirect, &attributes);
-    XMoveResizeWindow(xdisplay, xwindow, x, y,
-                      size.width * scale, size.height * scale);
-    XRaiseWindow(xdisplay, xwindow);
-    XFlush(xdisplay);
-}
-#endif
-
-static void size_player_window(GtkWidget *widget, gpointer user_data)
-{
-    (void)user_data;
-
-    GdkDisplay *display = gtk_widget_get_display(widget);
-#ifdef GDK_WINDOWING_X11
-    if (GDK_IS_X11_DISPLAY(display))
-    {
-        return;
-    }
-#endif
-
-    GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
-    GdkMonitor *monitor = gdk_display_get_monitor_at_surface(display, surface);
-
-    if (monitor == NULL)
-    {
-        return;
-    }
-
-    GdkRectangle geometry;
-    gdk_monitor_get_geometry(monitor, &geometry);
-
-    const player_size size = calculate_player_size(
-        geometry.width, geometry.height);
-    gtk_window_set_default_size(GTK_WINDOW(widget), size.width, size.height);
-}
 
 static void close_player_window(playback_state *state)
 {
@@ -202,18 +86,16 @@ static void activate_player(GtkApplication *application, gpointer user_data)
 
     gtk_window_set_title(state->window, "Pls Rember Daily");
     gtk_window_set_default_size(
-        state->window, minimum_player_width, minimum_player_height);
+        state->window, player_minimum_width, player_minimum_height);
 
     gtk_window_set_decorated(state->window, FALSE);
     gtk_window_set_resizable(state->window, FALSE);
     gtk_window_set_child(state->window, picture);
 
-#ifdef GDK_WINDOWING_X11
     g_signal_connect(state->window, "realize",
-                     G_CALLBACK(prepare_x11_player_window), NULL);
-#endif
+                     G_CALLBACK(prepare_player_window), state);
     g_signal_connect(state->window, "map",
-                     G_CALLBACK(size_player_window), NULL);
+                     G_CALLBACK(size_player_window), state);
     g_signal_connect(state->window, "destroy",
                      G_CALLBACK(player_window_destroyed), state);
     g_signal_connect(state->media, "notify::ended",
@@ -235,6 +117,13 @@ static void activate_player(GtkApplication *application, gpointer user_data)
 
 void *linux_application_new(const char *application_id)
 {
+    configure_linux_rendering();
+
+    if (g_getenv("GSK_RENDERER") == NULL)
+    {
+        g_setenv("GSK_RENDERER", "cairo", FALSE);
+    }
+
 #if GLIB_CHECK_VERSION(2, 74, 0)
     return gtk_application_new(application_id, G_APPLICATION_DEFAULT_FLAGS);
 #else
@@ -281,7 +170,10 @@ char *linux_play_video(void *application, const char *video_path)
     const int status = g_application_run(
         G_APPLICATION(state.application), 0, NULL);
 
-    g_signal_handlers_disconnect_by_data(state.application, &state);
+    if (state.application != NULL)
+    {
+        g_signal_handlers_disconnect_by_data(state.application, &state);
+    }
 
     if (state.media != NULL)
     {
