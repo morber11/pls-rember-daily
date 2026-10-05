@@ -9,25 +9,23 @@ import (
 	"path/filepath"
 	"time"
 
+	"plsremberdaily/internal/appdata"
 	"plsremberdaily/internal/filemode"
 )
 
-const (
-	appDataDir = "PlsRemberDaily"
-	stateFile  = "state.json"
-)
+const stateFile = "state.json"
 
 type state struct {
 	LastShown string `json:"lastShown"`
 }
 
 func stateFilePath() (string, error) {
-	configDir, err := os.UserConfigDir()
+	appDirectory, err := appdata.Directory()
 	if err != nil {
-		return "", fmt.Errorf("find user config directory: %w", err)
+		return "", err
 	}
 
-	return filepath.Join(configDir, appDataDir, stateFile), nil
+	return filepath.Join(appDirectory, stateFile), nil
 }
 
 func loadState(path string) (state, error) {

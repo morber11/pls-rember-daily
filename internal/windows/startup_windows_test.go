@@ -11,21 +11,21 @@ import (
 	"plsremberdaily/internal/filemode"
 )
 
-func TestInstallExecutableCopiesIntoConfigDirectory(t *testing.T) {
+func TestInstallExecutableCopiesIntoAppDirectory(t *testing.T) {
 	executable := filepath.Join(t.TempDir(), "downloaded.exe")
 	content := []byte("executable content")
 	if err := os.WriteFile(executable, content, filemode.OwnerReadWriteExecute); err != nil {
 		t.Fatalf("write executable: %v", err)
 	}
 
-	configDirectory := t.TempDir()
+	appDirectory := filepath.Join(t.TempDir(), "PlsRemberDaily")
 
-	installed, err := installExecutable(configDirectory, executable)
+	installed, err := installExecutable(appDirectory, executable)
 	if err != nil {
 		t.Fatalf("installExecutable() error = %v", err)
 	}
 
-	want := filepath.Join(configDirectory, "PlsRemberDaily", "PlsRemberDaily.exe")
+	want := filepath.Join(appDirectory, "PlsRemberDaily.exe")
 	if installed != want {
 		t.Errorf("installExecutable() = %q, want %q", installed, want)
 	}

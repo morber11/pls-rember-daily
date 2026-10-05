@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/sys/windows/registry"
 
+	"plsremberdaily/internal/appdata"
 	"plsremberdaily/internal/filemode"
 )
 
@@ -24,12 +25,12 @@ func Register() error {
 		return fmt.Errorf("could not find executable path: %w", err)
 	}
 
-	configDirectory, err := os.UserConfigDir()
+	appDirectory, err := appdata.Directory()
 	if err != nil {
-		return fmt.Errorf("could not find user configuration directory: %w", err)
+		return err
 	}
 
-	installed, err := installExecutable(configDirectory, executable)
+	installed, err := installExecutable(appDirectory, executable)
 	if err != nil {
 		return err
 	}
@@ -47,8 +48,8 @@ func Register() error {
 	return nil
 }
 
-func installExecutable(configDirectory string, executable string) (string, error) {
-	installed := filepath.Join(configDirectory, appName, appName+".exe")
+func installExecutable(appDirectory string, executable string) (string, error) {
+	installed := filepath.Join(appDirectory, appName+".exe")
 
 	if strings.EqualFold(executable, installed) {
 		return installed, nil
@@ -59,7 +60,7 @@ func installExecutable(configDirectory string, executable string) (string, error
 		return "", fmt.Errorf("read running executable: %w", err)
 	}
 
-	if err := os.MkdirAll(filepath.Dir(installed), filemode.OwnerReadWriteExecute); err != nil {
+	if err := os.MkdirAll(appDirectory, filemode.OwnerReadWriteExecute); err != nil {
 		return "", fmt.Errorf("create install directory: %w", err)
 	}
 
