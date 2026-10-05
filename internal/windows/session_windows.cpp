@@ -5,6 +5,8 @@
 #include <windows.h>
 #include <wtsapi32.h>
 
+constexpr DWORD unlock_poll_interval_ms = 1000;
+
 // windows can sign the user in automatically and then show the lock screen
 // so wait until the user has unlocked the session before playing
 extern "C" long wait_for_unlocked_session(void)
@@ -33,6 +35,6 @@ extern "C" long wait_for_unlocked_session(void)
             return S_OK;
         }
 
-        Sleep(1000);
+        Sleep(unlock_poll_interval_ms);
     }
 }
