@@ -4,7 +4,11 @@ package windows
 
 /*
 #cgo windows CXXFLAGS: -std=c++17
-#cgo windows LDFLAGS: -lmfplat -lmfuuid -lole32 -loleaut32 -luuid -luser32 -lgdi32 -static
+#cgo windows LDFLAGS: -lmfplat -lmfuuid -lole32 -loleaut32 -luuid -luser32 -lgdi32
+
+// link the MinGW runtime statically so the exe runs on machines without MinGW
+#cgo windows LDFLAGS: -static
+
 #include "player_windows.h"
 */
 import "C"
