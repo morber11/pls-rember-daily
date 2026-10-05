@@ -24,5 +24,9 @@ func (Runtime) RegisterStartup() error {
 }
 
 func (Runtime) Play(video assets.Video, onStarted func() error) error {
+	if err := WaitForUnlock(); err != nil {
+		return err
+	}
+
 	return Play(video, onStarted)
 }
