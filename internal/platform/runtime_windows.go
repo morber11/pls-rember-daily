@@ -12,5 +12,8 @@ func NewRuntime() application.Platform {
 }
 
 func Uninstall() error {
-	return windows.Uninstall()
+	err := windows.Uninstall()
+	windows.ShowUninstallResult(err)
+
+	return err
 }
