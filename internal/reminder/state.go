@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"plsremberdaily/internal/filemode"
 )
 
 const (
@@ -52,11 +54,11 @@ func saveState(path string, now time.Time) error {
 		return fmt.Errorf("encode reminder state: %w", err)
 	}
 
-	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), filemode.OwnerReadWriteExecute); err != nil {
 		return fmt.Errorf("create reminder state directory: %w", err)
 	}
 
-	if err := os.WriteFile(path, data, 0o600); err != nil {
+	if err := os.WriteFile(path, data, filemode.OwnerReadWrite); err != nil {
 		return fmt.Errorf("write reminder state: %w", err)
 	}
 

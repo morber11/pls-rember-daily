@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"plsremberdaily/internal/filemode"
 )
 
 const startupFileName = applicationID + ".desktop"
@@ -32,7 +34,7 @@ func writeStartupEntry(configDirectory string, executable string) error {
 	}
 
 	autostartDirectory := filepath.Join(configDirectory, "autostart")
-	if err := os.MkdirAll(autostartDirectory, 0700); err != nil {
+	if err := os.MkdirAll(autostartDirectory, filemode.OwnerReadWriteExecute); err != nil {
 		return fmt.Errorf("create Linux autostart directory: %w", err)
 	}
 
@@ -46,11 +48,11 @@ func writeStartupEntry(configDirectory string, executable string) error {
 	}, "\n")
 
 	path := filepath.Join(autostartDirectory, startupFileName)
-	if err := os.WriteFile(path, []byte(entry), 0600); err != nil {
+	if err := os.WriteFile(path, []byte(entry), filemode.OwnerReadWrite); err != nil {
 		return fmt.Errorf("write Linux autostart entry: %w", err)
 	}
 
-	if err := os.Chmod(path, 0600); err != nil {
+	if err := os.Chmod(path, filemode.OwnerReadWrite); err != nil {
 		return fmt.Errorf("set Linux autostart entry permissions: %w", err)
 	}
 
