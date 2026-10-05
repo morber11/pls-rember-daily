@@ -4,7 +4,7 @@ package windows
 
 /*
 #cgo windows CXXFLAGS: -std=c++17
-#cgo windows LDFLAGS: -lmfplat -lmfuuid -lole32 -loleaut32 -luuid -luser32 -lgdi32 -lwtsapi32
+#cgo windows LDFLAGS: -lmfplat -lmfuuid -lole32 -loleaut32 -luuid -luser32 -lgdi32 -lwtsapi32 -static
 #include "player_windows.h"
 #include "session_windows.h"
 */
