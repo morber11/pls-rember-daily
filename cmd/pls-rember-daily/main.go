@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"plsremberdaily/internal/application"
@@ -10,6 +11,17 @@ import (
 )
 
 func main() {
+	uninstall := flag.Bool("uninstall", false, "remove startup registration and app data, then exit")
+	flag.Parse()
+
+	if *uninstall {
+		if err := platform.Uninstall(); err != nil {
+			log.Fatal(err)
+		}
+
+		return
+	}
+
 	runner := application.NewRunner(
 		platform.NewRuntime(),
 		reminder.Service{},

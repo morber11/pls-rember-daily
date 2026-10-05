@@ -3,10 +3,14 @@
 package linux
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"plsremberdaily/internal/filemode"
 )
 
 func TestWriteStartupEntry(t *testing.T) {
@@ -54,5 +58,31 @@ func TestWriteStartupEntryEscapesExecutablePath(t *testing.T) {
 	want := `Exec="/opt/a\\\\b\\"c\\` + "`" + `\\$d%%\te\nf\rg/app"` + "\n"
 	if !strings.Contains(string(data), want) {
 		t.Errorf("startup entry does not contain %q", want)
+	}
+}
+
+func TestRemoveInstalledFiles(t *testing.T) {
+	configDirectory := t.TempDir()
+	if err := writeStartupEntry(configDirectory, "/opt/pls-rember-daily"); err != nil {
+		t.Fatalf("writeStartupEntry() error = %v", err)
+	}
+
+	appDirectory := filepath.Join(configDirectory, "PlsRemberDaily")
+	if err := os.MkdirAll(appDirectory, filemode.OwnerReadWriteExecute); err != nil {
+		t.Fatalf("create app directory: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(appDirectory, "state.json"), nil, filemode.OwnerReadWrite); err != nil {
+		t.Fatalf("write state: %v", err)
+	}
+
+	if err := removeInstalledFiles(configDirectory, appDirectory); err != nil {
+		t.Fatalf("removeInstalledFiles() error = %v", err)
+	}
+
+	for _, path := range []string{startupEntryPath(configDirectory), appDirectory} {
+		if _, err := os.Stat(path); !errors.Is(err, fs.ErrNotExist) {
+			t.Errorf("%s still exists, stat error = %v", path, err)
+		}
 	}
 }

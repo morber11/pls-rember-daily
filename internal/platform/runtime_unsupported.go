@@ -17,6 +17,10 @@ func NewRuntime() application.Platform {
 	return unsupportedRuntime{}
 }
 
+func Uninstall() error {
+	return errUnsupported
+}
+
 func (unsupportedRuntime) Acquire() (func(), bool, error) {
 	return nil, false, errUnsupported
 }

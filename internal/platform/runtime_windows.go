@@ -10,3 +10,7 @@ import (
 func NewRuntime() application.Platform {
 	return windows.Runtime{}
 }
+
+func Uninstall() error {
+	return windows.Uninstall()
+}

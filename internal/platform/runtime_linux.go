@@ -10,3 +10,7 @@ import (
 func NewRuntime() application.Platform {
 	return &linux.Runtime{}
 }
+
+func Uninstall() error {
+	return linux.Uninstall()
+}

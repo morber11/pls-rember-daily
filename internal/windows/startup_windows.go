@@ -3,6 +3,7 @@
 package windows
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -48,8 +49,36 @@ func Register() error {
 	return nil
 }
 
+func Uninstall() error {
+	executable, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("could not find executable path: %w", err)
+	}
+
+	appDirectory, err := appdata.Directory()
+	if err != nil {
+		return err
+	}
+
+	key, err := registry.OpenKey(registry.CURRENT_USER, runKey, registry.SET_VALUE)
+	if err != nil {
+		return fmt.Errorf("opening Windows startup key: %w", err)
+	}
+	defer key.Close()
+
+	if err := key.DeleteValue(appName); err != nil && !errors.Is(err, registry.ErrNotExist) {
+		return fmt.Errorf("remove Windows startup: %w", err)
+	}
+
+	return removeAppDirectory(appDirectory, executable)
+}
+
+func installedExecutablePath(appDirectory string) string {
+	return filepath.Join(appDirectory, appName+".exe")
+}
+
 func installExecutable(appDirectory string, executable string) (string, error) {
-	installed := filepath.Join(appDirectory, appName+".exe")
+	installed := installedExecutablePath(appDirectory)
 
 	if strings.EqualFold(executable, installed) {
 		return installed, nil
@@ -69,4 +98,21 @@ func installExecutable(appDirectory string, executable string) (string, error) {
 	}
 
 	return installed, nil
+}
+
+func removeAppDirectory(appDirectory string, executable string) error {
+	installed := installedExecutablePath(appDirectory)
+
+	// windows cannot delete a running executable but it can move/rename it for some reason
+	if strings.EqualFold(executable, installed) {
+		if err := os.Rename(installed, filepath.Join(os.TempDir(), appName+".exe")); err != nil {
+			return fmt.Errorf("move running executable out of app directory: %w", err)
+		}
+	}
+
+	if err := os.RemoveAll(appDirectory); err != nil {
+		return fmt.Errorf("remove app directory: %w", err)
+	}
+
+	return nil
 }

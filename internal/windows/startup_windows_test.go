@@ -4,6 +4,8 @@ package windows
 
 import (
 	"bytes"
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -37,5 +39,28 @@ func TestInstallExecutableCopiesIntoAppDirectory(t *testing.T) {
 
 	if !bytes.Equal(data, content) {
 		t.Errorf("installed executable content = %q, want %q", data, content)
+	}
+}
+
+func TestRemoveAppDirectoryRemovesInstalledFiles(t *testing.T) {
+	appDirectory := filepath.Join(t.TempDir(), "PlsRemberDaily")
+	if err := os.MkdirAll(appDirectory, filemode.OwnerReadWriteExecute); err != nil {
+		t.Fatalf("create app directory: %v", err)
+	}
+
+	for _, name := range []string{"PlsRemberDaily.exe", "state.json"} {
+		if err := os.WriteFile(filepath.Join(appDirectory, name), nil, filemode.OwnerReadWrite); err != nil {
+			t.Fatalf("write %s: %v", name, err)
+		}
+	}
+
+	executable := filepath.Join(t.TempDir(), "downloaded.exe")
+
+	if err := removeAppDirectory(appDirectory, executable); err != nil {
+		t.Fatalf("removeAppDirectory() error = %v", err)
+	}
+
+	if _, err := os.Stat(appDirectory); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("app directory still exists, stat error = %v", err)
 	}
 }

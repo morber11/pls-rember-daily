@@ -3,11 +3,14 @@
 package linux
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"plsremberdaily/internal/appdata"
 	"plsremberdaily/internal/filemode"
 )
 
@@ -27,14 +30,32 @@ func Register() error {
 	return writeStartupEntry(configDirectory, executable)
 }
 
+func Uninstall() error {
+	configDirectory, err := os.UserConfigDir()
+	if err != nil {
+		return fmt.Errorf("could not find user configuration directory: %w", err)
+	}
+
+	appDirectory, err := appdata.Directory()
+	if err != nil {
+		return err
+	}
+
+	return removeInstalledFiles(configDirectory, appDirectory)
+}
+
+func startupEntryPath(configDirectory string) string {
+	return filepath.Join(configDirectory, "autostart", startupFileName)
+}
+
 func writeStartupEntry(configDirectory string, executable string) error {
 	exec, err := quoteDesktopEntryArgument(executable)
 	if err != nil {
 		return err
 	}
 
-	autostartDirectory := filepath.Join(configDirectory, "autostart")
-	if err := os.MkdirAll(autostartDirectory, filemode.OwnerReadWriteExecute); err != nil {
+	path := startupEntryPath(configDirectory)
+	if err := os.MkdirAll(filepath.Dir(path), filemode.OwnerReadWriteExecute); err != nil {
 		return fmt.Errorf("create Linux autostart directory: %w", err)
 	}
 
@@ -47,13 +68,24 @@ func writeStartupEntry(configDirectory string, executable string) error {
 		"",
 	}, "\n")
 
-	path := filepath.Join(autostartDirectory, startupFileName)
 	if err := os.WriteFile(path, []byte(entry), filemode.OwnerReadWrite); err != nil {
 		return fmt.Errorf("write Linux autostart entry: %w", err)
 	}
 
 	if err := os.Chmod(path, filemode.OwnerReadWrite); err != nil {
 		return fmt.Errorf("set Linux autostart entry permissions: %w", err)
+	}
+
+	return nil
+}
+
+func removeInstalledFiles(configDirectory string, appDirectory string) error {
+	if err := os.Remove(startupEntryPath(configDirectory)); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("remove Linux autostart entry: %w", err)
+	}
+
+	if err := os.RemoveAll(appDirectory); err != nil {
+		return fmt.Errorf("remove app directory: %w", err)
 	}
 
 	return nil
