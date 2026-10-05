@@ -4,9 +4,8 @@ package windows
 
 /*
 #cgo windows CXXFLAGS: -std=c++17
-#cgo windows LDFLAGS: -lmfplat -lmfuuid -lole32 -loleaut32 -luuid -luser32 -lgdi32 -lwtsapi32 -static
+#cgo windows LDFLAGS: -lmfplat -lmfuuid -lole32 -loleaut32 -luuid -luser32 -lgdi32 -static
 #include "player_windows.h"
-#include "session_windows.h"
 */
 import "C"
 
@@ -45,14 +44,6 @@ func Play(video assets.Video, onStarted func() error) error {
 
 	if result < 0 {
 		return fmt.Errorf("play video: HRESULT 0x%08X", uint32(result))
-	}
-
-	return nil
-}
-
-func WaitForUnlock() error {
-	if result := C.wait_for_unlocked_session(); result < 0 {
-		return fmt.Errorf("wait for unlocked session: HRESULT 0x%08X", uint32(result))
 	}
 
 	return nil
