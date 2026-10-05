@@ -26,7 +26,7 @@ extern "C" long wait_for_unlocked_session(void)
             return HRESULT_FROM_WIN32(GetLastError());
         }
 
-        const auto *info = reinterpret_cast<WTSINFOEXW *>(buffer);
+        const auto *info = reinterpret_cast<const WTSINFOEXW *>(buffer);
         const LONG flags = info->Data.WTSInfoExLevel1.SessionFlags;
         WTSFreeMemory(buffer);
 
