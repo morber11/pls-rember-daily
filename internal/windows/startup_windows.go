@@ -15,10 +15,7 @@ import (
 	"plsremberdaily/internal/filemode"
 )
 
-const (
-	runKey  = `Software\Microsoft\Windows\CurrentVersion\Run`
-	appName = "PlsRemberDaily"
-)
+const runKey = `Software\Microsoft\Windows\CurrentVersion\Run`
 
 func Register() error {
 	executable, err := os.Executable()
@@ -42,7 +39,7 @@ func Register() error {
 	}
 	defer key.Close()
 
-	if err := key.SetStringValue(appName, fmt.Sprintf(`"%s"`, installed)); err != nil {
+	if err := key.SetStringValue(appdata.Name, fmt.Sprintf(`"%s"`, installed)); err != nil {
 		return fmt.Errorf("register Windows startup: %w", err)
 	}
 
@@ -66,7 +63,7 @@ func Uninstall() error {
 	}
 	defer key.Close()
 
-	if err := key.DeleteValue(appName); err != nil && !errors.Is(err, registry.ErrNotExist) {
+	if err := key.DeleteValue(appdata.Name); err != nil && !errors.Is(err, registry.ErrNotExist) {
 		return fmt.Errorf("remove Windows startup: %w", err)
 	}
 
@@ -74,7 +71,7 @@ func Uninstall() error {
 }
 
 func installedExecutablePath(appDirectory string) string {
-	return filepath.Join(appDirectory, appName+".exe")
+	return filepath.Join(appDirectory, appdata.Name+".exe")
 }
 
 func installExecutable(appDirectory string, executable string) (string, error) {
@@ -105,7 +102,7 @@ func removeAppDirectory(appDirectory string, executable string) error {
 
 	// windows cannot delete a running executable but it can move/rename it for some reason
 	if strings.EqualFold(executable, installed) {
-		if err := os.Rename(installed, filepath.Join(os.TempDir(), appName+".exe")); err != nil {
+		if err := os.Rename(installed, filepath.Join(os.TempDir(), appdata.Name+".exe")); err != nil {
 			return fmt.Errorf("move running executable out of app directory: %w", err)
 		}
 	}

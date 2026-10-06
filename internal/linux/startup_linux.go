@@ -41,7 +41,7 @@ func Uninstall() error {
 		return err
 	}
 
-	return removeInstalledFiles(configDirectory, appDirectory)
+	return removeStartupEntryAndAppData(configDirectory, appDirectory)
 }
 
 func startupEntryPath(configDirectory string) string {
@@ -79,7 +79,7 @@ func writeStartupEntry(configDirectory string, executable string) error {
 	return nil
 }
 
-func removeInstalledFiles(configDirectory string, appDirectory string) error {
+func removeStartupEntryAndAppData(configDirectory string, appDirectory string) error {
 	if err := os.Remove(startupEntryPath(configDirectory)); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return fmt.Errorf("remove Linux autostart entry: %w", err)
 	}

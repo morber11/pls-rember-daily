@@ -61,7 +61,7 @@ func TestWriteStartupEntryEscapesExecutablePath(t *testing.T) {
 	}
 }
 
-func TestRemoveInstalledFiles(t *testing.T) {
+func TestRemoveStartupEntryAndAppData(t *testing.T) {
 	configDirectory := t.TempDir()
 	if err := writeStartupEntry(configDirectory, "/opt/pls-rember-daily"); err != nil {
 		t.Fatalf("writeStartupEntry() error = %v", err)
@@ -76,8 +76,8 @@ func TestRemoveInstalledFiles(t *testing.T) {
 		t.Fatalf("write state: %v", err)
 	}
 
-	if err := removeInstalledFiles(configDirectory, appDirectory); err != nil {
-		t.Fatalf("removeInstalledFiles() error = %v", err)
+	if err := removeStartupEntryAndAppData(configDirectory, appDirectory); err != nil {
+		t.Fatalf("removeStartupEntryAndAppData() error = %v", err)
 	}
 
 	for _, path := range []string{startupEntryPath(configDirectory), appDirectory} {

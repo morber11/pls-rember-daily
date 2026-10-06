@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-const directoryName = "PlsRemberDaily"
+const Name = "PlsRemberDaily"
 
 func Directory() (string, error) {
 	configDirectory, err := os.UserConfigDir()
@@ -14,5 +14,5 @@ func Directory() (string, error) {
 		return "", fmt.Errorf("find user configuration directory: %w", err)
 	}
 
-	return filepath.Join(configDirectory, directoryName), nil
+	return filepath.Join(configDirectory, Name), nil
 }
