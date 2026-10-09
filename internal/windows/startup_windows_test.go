@@ -22,17 +22,17 @@ func TestInstallExecutableCopiesIntoAppDirectory(t *testing.T) {
 
 	appDirectory := filepath.Join(t.TempDir(), "PlsRemberDaily")
 
-	installed, err := installExecutable(appDirectory, executable)
+	installedPath, err := installExecutable(appDirectory, executable)
 	if err != nil {
 		t.Fatalf("installExecutable() error = %v", err)
 	}
 
 	want := filepath.Join(appDirectory, "PlsRemberDaily.exe")
-	if installed != want {
-		t.Errorf("installExecutable() = %q, want %q", installed, want)
+	if installedPath != want {
+		t.Errorf("installExecutable() = %q, want %q", installedPath, want)
 	}
 
-	data, err := os.ReadFile(installed)
+	data, err := os.ReadFile(installedPath)
 	if err != nil {
 		t.Fatalf("read installed executable: %v", err)
 	}

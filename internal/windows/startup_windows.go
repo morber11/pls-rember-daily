@@ -15,7 +15,7 @@ import (
 	"plsremberdaily/internal/filemode"
 )
 
-const runKey = `Software\Microsoft\Windows\CurrentVersion\Run`
+const startupRegistryKey = `Software\Microsoft\Windows\CurrentVersion\Run`
 
 func Register() error {
 	executable, err := os.Executable()
@@ -28,18 +28,18 @@ func Register() error {
 		return err
 	}
 
-	installed, err := installExecutable(appDirectory, executable)
+	installedPath, err := installExecutable(appDirectory, executable)
 	if err != nil {
 		return err
 	}
 
-	key, _, err := registry.CreateKey(registry.CURRENT_USER, runKey, registry.SET_VALUE)
+	key, _, err := registry.CreateKey(registry.CURRENT_USER, startupRegistryKey, registry.SET_VALUE)
 	if err != nil {
 		return fmt.Errorf("opening Windows startup key: %w", err)
 	}
 	defer key.Close()
 
-	if err := key.SetStringValue(appdata.Name, fmt.Sprintf(`"%s"`, installed)); err != nil {
+	if err := key.SetStringValue(appdata.Name, fmt.Sprintf(`"%s"`, installedPath)); err != nil {
 		return fmt.Errorf("register Windows startup: %w", err)
 	}
 
@@ -57,7 +57,7 @@ func Uninstall() error {
 		return err
 	}
 
-	key, err := registry.OpenKey(registry.CURRENT_USER, runKey, registry.SET_VALUE)
+	key, err := registry.OpenKey(registry.CURRENT_USER, startupRegistryKey, registry.SET_VALUE)
 	if err != nil {
 		return fmt.Errorf("opening Windows startup key: %w", err)
 	}
@@ -75,10 +75,10 @@ func installedExecutablePath(appDirectory string) string {
 }
 
 func installExecutable(appDirectory string, executable string) (string, error) {
-	installed := installedExecutablePath(appDirectory)
+	installedPath := installedExecutablePath(appDirectory)
 
-	if strings.EqualFold(executable, installed) {
-		return installed, nil
+	if strings.EqualFold(executable, installedPath) {
+		return installedPath, nil
 	}
 
 	data, err := os.ReadFile(executable)
@@ -90,19 +90,19 @@ func installExecutable(appDirectory string, executable string) (string, error) {
 		return "", fmt.Errorf("create install directory: %w", err)
 	}
 
-	if err := os.WriteFile(installed, data, filemode.OwnerReadWriteExecute); err != nil {
+	if err := os.WriteFile(installedPath, data, filemode.OwnerReadWriteExecute); err != nil {
 		return "", fmt.Errorf("copy executable to install directory: %w", err)
 	}
 
-	return installed, nil
+	return installedPath, nil
 }
 
 func removeAppDirectory(appDirectory string, executable string) error {
-	installed := installedExecutablePath(appDirectory)
+	installedPath := installedExecutablePath(appDirectory)
 
 	// windows cannot delete a running executable but it can move/rename it for some reason
-	if strings.EqualFold(executable, installed) {
-		if err := os.Rename(installed, filepath.Join(os.TempDir(), appdata.Name+".exe")); err != nil {
+	if strings.EqualFold(executable, installedPath) {
+		if err := os.Rename(installedPath, filepath.Join(os.TempDir(), appdata.Name+".exe")); err != nil {
 			return fmt.Errorf("move running executable out of app directory: %w", err)
 		}
 	}
