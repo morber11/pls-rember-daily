@@ -55,6 +55,7 @@ func writeStartupEntry(configDirectory string, executable string) error {
 	}
 
 	path := startupEntryPath(configDirectory)
+
 	if err := os.MkdirAll(filepath.Dir(path), filemode.OwnerReadWriteExecute); err != nil {
 		return fmt.Errorf("create Linux autostart directory: %w", err)
 	}
