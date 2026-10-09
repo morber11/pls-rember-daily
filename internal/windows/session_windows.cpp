@@ -27,10 +27,10 @@ extern "C" long wait_for_unlocked_session(void)
         }
 
         const auto *info = reinterpret_cast<const WTSINFOEXW *>(buffer);
-        const LONG flags = info->Data.WTSInfoExLevel1.SessionFlags;
+        const LONG session_state = info->Data.WTSInfoExLevel1.SessionFlags;
         WTSFreeMemory(buffer);
 
-        if (flags == WTS_SESSIONSTATE_UNLOCK)
+        if (session_state == WTS_SESSIONSTATE_UNLOCK)
         {
             return S_OK;
         }
