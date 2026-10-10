@@ -19,13 +19,10 @@ type scheduledVideo struct {
 var scheduledVideos = []scheduledVideo{
 	{month: time.September, day: 21, weekday: anyWeekday, video: assets.SemberVideo()}, // sember
 	{day: 13, weekday: time.Friday, video: assets.EvilVideo()},                         // fri 13th - EVIL
+	{day: 9, month: time.September, video: assets.CirnoDayVideo()},                     // cirno day
 }
 
 func Video(now time.Time) assets.Video {
-	if now.Month() == time.September && now.Day() == 9 {
-		return assets.CirnoDayVideo()
-	}
-
 	for _, scheduled := range scheduledVideos {
 		if now.Day() == scheduled.day &&
 			(scheduled.month == 0 || now.Month() == scheduled.month) &&
