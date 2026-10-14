@@ -58,3 +58,5 @@ The binary itself is not removed, so delete it manually afterwards
   ```bash
   ./PlsRemberDaily -uninstall
   ```
+
+Special thanks to the (now deleted) Youtube channel pls rember daily
