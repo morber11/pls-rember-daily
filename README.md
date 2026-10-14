@@ -32,6 +32,7 @@ Requires `pkg-config` and the development files for GTK 4.8 or newer and X11.
 ```bash
 ./build-linux.sh
 ```
+
 ## Installing
 
 Run the executable and pls rember
