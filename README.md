@@ -10,6 +10,8 @@ wen day is dark alway rember happy day
 
 Requires Go 1.26.2 or newer with `cgo` enabled.
 
+Output is inside the `dist\` folder
+
 ### Windows
 
 Requires MinGW-w64 (`gcc` and `g++`) on your `PATH`.
@@ -17,8 +19,6 @@ Requires MinGW-w64 (`gcc` and `g++`) on your `PATH`.
 ```powershell
 .\build.ps1
 ```
-
-The executable is written to `dist\PlsRemberDaily.exe`
 
 Optional flags:
 
@@ -32,9 +32,6 @@ Requires `pkg-config` and the development files for GTK 4.8 or newer and X11.
 ```bash
 ./build-linux.sh
 ```
-
-The binary is written to `dist/PlsRemberDaily`
-
 ## Installing
 
 Run the executable and pls rember
