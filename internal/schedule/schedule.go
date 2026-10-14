@@ -17,9 +17,9 @@ type scheduledVideo struct {
 }
 
 var scheduledVideos = []scheduledVideo{
-	{month: time.September, day: 21, weekday: anyWeekday, video: assets.SemberVideo()}, // sember
-	{day: 13, weekday: time.Friday, video: assets.EvilVideo()},                         // fri 13th - EVIL
-	{day: 9, month: time.September, video: assets.CirnoDayVideo()},                     // cirno day
+	{month: time.September, day: 21, weekday: anyWeekday, video: assets.SemberVideo()},  // sember
+	{day: 13, weekday: time.Friday, video: assets.EvilVideo()},                          // fri 13th - EVIL
+	{month: time.September, day: 9, weekday: anyWeekday, video: assets.CirnoDayVideo()}, // cirno day
 }
 
 func Video(now time.Time) assets.Video {
