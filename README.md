@@ -49,7 +49,7 @@ Run the executable with `-uninstall`
   .\PlsRemberDaily.exe -uninstall
   ```
 
-  Running from any location should automatically delete the exe in `%APPDATA%\PlsRemberDaily\` and startup entries
+Running from any location should automatically delete the exe in `%APPDATA%\PlsRemberDaily\` and startup entries
 
 - **Linux:**
 
